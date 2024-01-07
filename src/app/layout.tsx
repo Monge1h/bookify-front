@@ -14,18 +14,29 @@ export const metadata: Metadata = {
 }
 
 
+const navBarPages = [
+  {
+    name: "My Books",
+    href: "/my-books",
+  },
+  {
+    name: "Activity",
+    href: "/activity",
+  },
+]
+
 const SidebarContent = () => {
   return (
     <div>
       <div>
         {/* todo add icons and link */}
         {/* todo add current page as active */}
-        {["My Books", "Activity"].map((item, index) => (
+        {navBarPages.map((item, index) => (
           <Link
             key={index}
-            href="#"
+            href={item.href}
             className="block rounded py-2.5 transition duration-200 hover:bg-green-300">
-            {item}
+            {item.name}
           </Link>
         ))}
       </div>
