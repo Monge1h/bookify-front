@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,7 +17,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <body className={inter.className}>
+      <div className="border-b">
+        <div className="flex h-16 items-center px-4 container mx-auto">
+          Bookify
+          <div className="ml-auto flex items-center space-x-4">
+            <Avatar>
+              <AvatarImage
+                src="https://github.com/shadcn.png"
+                alt="@shadcn"
+              />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* <SideMenu /> */}
+
+        <div className="w-full px-4 pt-8">{children}</div>
+      </div>
+    </body>
+  </html>
   )
 }
