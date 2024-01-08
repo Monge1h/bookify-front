@@ -10,15 +10,32 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
-export function BookSearchDialog() {
+export function BookSearchDialog({secAction, action}: {secAction: any, action:number} ) {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [books, setBooks] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+
+	const [selectedBook, setSelectedBook] = useState(null);
+	const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+
+
 
 	useEffect(() => {
 		const delayDebounceFn = setTimeout(() => {
@@ -42,8 +59,34 @@ export function BookSearchDialog() {
 		return () => clearTimeout(delayDebounceFn);
 	}, [searchTerm]);
 
-	const handleSearch = (e) => {
+	const handleSearch = (e:any) => {
 		e.preventDefault();
+	};
+
+	const handleBookSelect = (book: any) => {
+		setSelectedBook(book);
+		setIsAlertDialogOpen(true);
+	};
+
+	const router = useRouter();
+	const handleAddToLibrary = (book:any) => {
+		console.log(book)
+		axios.post('http://localhost:3000/api/books', {
+			title: book._title,
+			description: book._description,
+			genre: book._genre,
+			image: book._image,
+			year: book._year,
+			author: book._author,
+			externalId: book._externalId,
+		}).then(response => {
+
+			secAction(action+1);
+		} ).catch(err => {
+			console.error('Error al añadir el libro:', err);
+		}
+		);
+
 	};
 
 	return (
@@ -81,17 +124,34 @@ export function BookSearchDialog() {
 				{error && <p>Error: {error}</p>}
 				<div className="flex overflow-x-auto">
 					{!loading && !error && books.map((book: any) => (
-						<div key={book._externalId} className="flex-shrink-0 p-4">
-							<h3 className="text-lg">{book._title}</h3>
-							<p className="text-sm">{book._author}</p>
-							<Image
-								src={book._image}
-								alt={`Portada de ${book._title}`}
-								className='w-24 h-32 md:w-48 md:h-64'
-								width={100}
-								height={100}
-							/>
-						</div>
+						<AlertDialog key={book._externalId}>
+							<AlertDialogTrigger asChild>
+
+								<div key={book._externalId} className="flex-shrink-0 p-4" onClick={() => handleBookSelect(book)}>
+									<h3 className="text-lg">{book._title}</h3>
+									<p className="text-sm">{book._author}</p>
+									<Image
+										src={book._image}
+										alt={`Portada de ${book._title}`}
+										className='w-24 h-32 md:w-48 md:h-64'
+										width={100}
+										height={100}
+									/>
+								</div>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>Do you want to add &quot;{book._title}&quot; to your personal library?</AlertDialogTitle>
+									<AlertDialogDescription>
+										This action will add the book to your personal collection.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>Cancel</AlertDialogCancel>
+									<AlertDialogAction onClick={() => handleAddToLibrary(book)}>Continue</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
 					))}
 				</div>
 			</DialogContent>

@@ -1,104 +1,76 @@
 "use client"
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+import { useRouter } from 'next/navigation';
+import { BookSearchDialog } from "./searchBook";
+import { BookCard } from './cardBook';
 
 export default function MyBooksPage() {
-	const books = [
-		{
-			title: "The Hobbit",
-			image: "https://wallpaperaccess.com/full/4723250.jpg",
-			author: "J.R.R. Tolkien",
-			genre: "Fantasy",
-			year: "1937",
-			id: 1,
-			status: "Read",
-		},
-		{
-			title: "The Hobbit",
-			image: "https://wallpaperaccess.com/full/4723250.jpg",
-			author: "J.R.R. Tolkien",
-			genre: "Fantasy",
-			year: "1937",
-			id: 2,
-			status: "Reading",
-		},
-		{
-			title: "The Hobbit",
-			image: "https://wallpaperaccess.com/full/4723250.jpg",
-			author: "J.R.R. Tolkien",
-			genre: "Fantasy",
-			year: "1937",
-			id: 3,
-			status: "Reading"
-		},
-		{
-			title: "The Hobbit",
-			image: "https://wallpaperaccess.com/full/4723250.jpg",
-			author: "J.R.R. Tolkien",
-			genre: "Fantasy",
-			year: "1937",
-			id: 4,
-			status: "Read"
-		},
-		{
-			title: "The Hobbit",
-			image: "https://wallpaperaccess.com/full/4723250.jpg",
-			author: "J.R.R. Tolkien",
-			genre: "Fantasy",
-			year: "1937",
-			id: 5,
-			status: "Read"
-		},
-	]
+	const [books, setBooks] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [action, setAction] = useState(1);
 
-    const handleDelete = (bookId: number) => {
-    };
+	useEffect(() => {
+		axios.get('http://localhost:3000/api/books/user')
+			.then(response => {
+				setBooks(response.data);
+				console.log(response.data);
+				setLoading(false);
+			})
+			.catch(error => {
+				console.error('Error fetching books:', error);
+				setLoading(false);
+			});
+	}, [action]);
 
-    const handleEdit = (bookId:number) => {
-    };
+
+	const router = useRouter();
+
+	const handleDelete = async (bookId: number) => {
+		try {
+			const response = await axios.delete(`http://localhost:3000/api/books/${bookId}`);
+			setAction(action + 1);
+		} catch (error) {
+			console.error('Error deleting book', error);
+		}
+	};
+
+
+	const handleEdit = (bookId: number, bookStatus: string) => {
+		try {
+			const response = axios.put(`http://localhost:3000/api/books/${bookId}`, {
+				status:  bookStatus === "Read" ? "Reading" : "Read",
+			});
+			setAction(action + 1);
+		} catch (error) {
+			console.error('Error editing book', error);
+		}
+	};
 
 	return (
 		<section>
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between pb-7">
 					<h1 className="text-4xl font-bold">My Books</h1>
-					<Button>Add</Button>
+					<BookSearchDialog secAction={setAction} action={action} />
 				</div>
 			</div>
-			{books.length === 0 ? (
-                <div className="text-center py-10">
-                    <p className="text-2xl">Add your first books 😃</p>
-                </div>
-            ) : (
+			{loading ? (
+				<div className="text-center py-10">
+					<p className="text-2xl">Loading books...</p>
+				</div>
+			) : books.length === 0 ? (
+				<div className="text-center py-10">
+					<p className="text-2xl">Add your first books 😃</p>
+				</div>
+			) : (
 				<div className="grid md:grid-cols-3 md:gap-4 grid-cols-1 gap-1 w-full">
-				{books.map((book, index) => (
-					<div key={index} className={`${book.status == "Reading" ? "bg-gray-200" : "bg-green-200" } rounded-xl overflow-hidden shadow-xl hover:scale-105 hover:shadow-2xl transform duration-500 cursor-pointer`}>
-						<Link href={"/book-details/" + book.id}>
-							<div className="p-4">
-								<h2 className="text-3xl font-bold hover:underline cursor-pointer">{book.title}</h2>
-								<p className="mt-2 font-sans text-gray-700">by {book.author}</p>
-								<p className="text-gray-500">{book.genre}</p>
-								<p className="text-gray-500">{book.year}</p>
-								<p className="text-gray-500">Status: {book.status}</p>
-							</div>
-						</Link>
-						<div className="relative">
-							<Image src={book.image} className="w-80" alt="image of book" width={320} height={480} />
-						</div>
-						<div className="p-4 flex justify-between">
-							<button onClick={() => handleEdit(book.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-								Edit
-							</button>
-							<button onClick={() => handleDelete(book.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-								Delete
-							</button>
-						</div>
-					</div>
-				))}
-			</div>
-            )}
-			
+					{books.map((book: any, index) => (
+						<BookCard key={index} book={book} handleEdit={() => handleEdit(book._id, book._status)} handleDelete={() => handleDelete(book._id)} />
+					))}
+				</div>
+			)}
 		</section>
-	)
+	);
 }
