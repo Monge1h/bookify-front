@@ -112,7 +112,7 @@ export function BookSearchDialog({secAction, action}: {secAction: any, action:nu
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								className="col-span-3"
-								placeholder="Introduce el título, autor, ISBN..."
+								placeholder="Introduce search term here"
 							/>
 						</div>
 					</div>
