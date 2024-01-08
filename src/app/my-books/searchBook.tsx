@@ -40,6 +40,9 @@ export function BookSearchDialog({secAction, action}: {secAction: any, action:nu
 	useEffect(() => {
 		const delayDebounceFn = setTimeout(() => {
 			if (searchTerm) {
+				if (searchTerm.trim() === '') {
+					return;
+				}
 				setLoading(true);
 				axios.get(`http://localhost:3000/api/books/search?q=${encodeURIComponent(searchTerm)}`)
 					.then(response => {
@@ -112,7 +115,7 @@ export function BookSearchDialog({secAction, action}: {secAction: any, action:nu
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								className="col-span-3"
-								placeholder="Introduce search term here"
+							placeholder="Introduce search term here"
 							/>
 						</div>
 					</div>
